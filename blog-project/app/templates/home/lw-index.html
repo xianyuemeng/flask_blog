@@ -1,0 +1,177 @@
+{% extends 'home/base.html' %}
+
+{% block banner %}
+<!-- banner start -->
+<div class="am-g am-g-fixed blog-fixed am-u-sm-centered blog-article-margin">
+    <div data-am-widget="slider" class="am-slider am-slider-b1" data-am-slider='{&quot;controlNav&quot;:false}'>
+        <ul class="am-slides">
+            <li>
+                <img src="/static/home/i/b1.jpg">
+                <div class="blog-slider-desc am-slider-desc ">
+                    <div class="blog-text-center blog-slider-con">
+                        <span>
+                            <a href="" class="blog-color">Article &nbsp;</a></span>
+                        <h1 class="blog-h-margin">
+                            <a href="">总在思考一句积极的话</a></h1>
+                        <p>那时候刚好下着雨，柏油路面湿冷冷的，还闪烁着青、黄、红颜色的灯火。</p>
+                        <span class="blog-bor">2015/10/9</span>
+                        <br>
+                        <br>
+                        <br>
+                        <br>
+                        <br>
+                        <br>
+                        <br>
+                    </div>
+                </div>
+            </li>
+            <li>
+                <img src="/static/home/i/b2.jpg">
+                <div class="am-slider-desc blog-slider-desc">
+                    <div class="blog-text-center blog-slider-con">
+                        <span>
+                            <a href="" class="blog-color">Article &nbsp;</a>
+                        </span>
+                        <h1 class="blog-h-margin">
+                            <a href="">总在思考一句积极的话</a>
+                        </h1>
+                        <p>那时候刚好下着雨，柏油路面湿冷冷的，还闪烁着青、黄、红颜色的灯火。</p>
+                        <span>2015/10/9</span>
+                    </div>
+                </div>
+            </li>
+            <li>
+                <img src="/static/home/i/b3.jpg">
+                <div class="am-slider-desc blog-slider-desc">
+                    <div class="blog-text-center blog-slider-con">
+                        <span>
+                            <a href="" class="blog-color">Article &nbsp;</a>
+                        </span>
+                        <h1 class="blog-h-margin">
+                            <a href="">总在思考一句积极的话</a>
+                        </h1>
+                        <p>那时候刚好下着雨，柏油路面湿冷冷的，还闪烁着青、黄、红颜色的灯火。</p>
+                        <span>2015/10/9</span>
+                    </div>
+                </div>
+            </li>
+            <li>
+                <img src="/static/home/i/b2.jpg">
+                <div class="am-slider-desc blog-slider-desc">
+                    <div class="blog-text-center blog-slider-con">
+                        <span>
+                            <a href="" class="blog-color">Article &nbsp;</a>
+                        </span>
+                        <h1 class="blog-h-margin">
+                            <a href="">总在思考一句积极的话</a>
+                        </h1>
+                        <p>那时候刚好下着雨，柏油路面湿冷冷的，还闪烁着青、黄、红颜色的灯火。</p>
+                        <span>2015/10/9</span>
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<!-- banner end -->
+{% endblock %}
+
+{% block con %}
+
+<div class="am-g am-g-fixed blog-fixed">
+    <hr>
+    {% block conleft %}
+    <div class="am-u-md-8 am-u-sm-12">
+        {% for i in posts.items %}
+        <article class="am-g blog-entry-article"> 
+            <div class="am-u-lg-6 am-u-md-12 am-u-sm-12 blog-entry-text">
+                <span><a href="" class="blog-color">作者 &nbsp;</a></span>
+                <span> @{{ i.user.name }} &nbsp;</span>
+                <span>{{ i.user.addtime }}</span>
+                <h1><a href="{{ url_for('home.bloginfo',pid=i.id)}}">{{ i.title }}</a></h1>
+              
+                <!-- <span>{{ i.context|safe }}</span> -->
+                
+            </div>
+        </article>
+        {% endfor %}
+
+        
+       <!--  <ul class="am-pagination">
+          <li class="am-pagination-prev"><a href="">&laquo; Prev</a></li>
+          <li class="am-pagination-next"><a href="">Next &raquo;</a></li>
+        </ul> -->
+        <ul class="am-pagination">
+            <li id="first_page" {% if request.args.get('p')|int == 1 %} class="am-disabled" {% endif %}>
+                <a href="javascript:;">首页</a>
+            </li>
+            <li id="left_btn" {% if request.args.get('p')|int == 1 %} class="am-disabled" {% endif %}>
+                <a href="javascript:;">«</a>
+            </li>
+           
+            {% for v in posts.iter_pages() %}
+            <li {% if v == request.args.get('p',1)|int %} class="am-active" {% endif %}>
+                <a class="cli" href="{% if v %} ?p={{ v }} {% else %} javascript:void(0) {% endif %}">{{ v|d('...',true) }}</a>
+            </li>
+            {% endfor %}
+            
+            <li id="right_btn" {% if request.args.get('p')|int == a | length %} class="am-disabled" {% endif %}>
+                <a href="javascript:;">»</a>
+            </li>
+            <li id="last_page" {% if request.args.get('p')|int == a | length %} class="am-disabled" {% endif %}>
+                <a href="javascript:;">尾页</a>
+            </li>
+        </ul>
+
+    </div>
+    {% endblock %}
+
+    {% block conright %}
+    <div class="am-u-md-4 am-u-sm-12 blog-sidebar">
+        
+        <div class="blog-clear-margin blog-sidebar-widget blog-bor am-g ">
+            <h2 class="blog-title">
+                <span>TAG cloud</span>
+            </h2>
+            <div class="am-u-sm-12 blog-clear-padding">
+                {% for v in 'a'| gettagsall %}
+                    <a href="{{ url_for('home.tagsblogs',tid=v.id) }}" class="blog-tag">{{ v.name }}</a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endblock %}
+</div>
+<script type="text/javascript">
+    $('#first_page').click(function(){
+        $(".am-pagination li").eq(2).find('.cli').append("<span></span>");
+        $(".am-pagination li").eq(2).find('.cli span').click();
+    })
+
+
+    $('#left_btn').click(function(){
+        var num = {{ request.args.get('p',1) }}
+        // alert(num)
+        $(".am-pagination li").eq(num).find('.cli').append("<span></span>");
+        $(".am-pagination li").eq(num).find('.cli span').click();
+    })
+
+    $('#right_btn').click(function(){
+        var num = {{ request.args.get('p',1) }}
+        // alert(num);
+        $(".am-pagination li").eq(num+2).find('.cli').append("<span></span>");
+        $(".am-pagination li").eq(num+2).find('.cli span').click();
+    })
+
+    $('#last_page').click(function(){
+        var num = {{ b }}
+        $(".am-pagination li").eq(num+1).find('.cli').append("<span></span>");
+        $(".am-pagination li").eq(num+1).find('.cli span').click();
+    })
+</script>
+
+{% endblock %}
+
+
+

@@ -1,0 +1,159 @@
+{% extends 'home/base.html' %}
+
+{% block nav %}
+    <nav class="am-g am-g-fixed blog-fixed blog-nav">
+        <button class="am-topbar-btn am-topbar-toggle am-btn am-btn-sm am-btn-success am-show-sm-only blog-button" data-am-collapse="{target: '#blog-collapse'}">
+            <span class="am-sr-only">导航切换</span>
+            <span class="am-icon-bars"></span>
+        </button>
+        <div class="am-collapse am-topbar-collapse" id="blog-collapse">
+            <ul class="am-nav am-nav-pills am-topbar-nav">
+                <li class="">
+                    <a href="{{ url_for('home.home', p=1) }}">首页</a>
+                </li>
+                {% if session['VipUser'] %}
+                    <li class="am-active"><a href="{{ url_for('home.myinfo') }}">个人中心</a></li>
+                    <li><a href="{{ url_for('home.createblog') }}">发布博文</a></li>
+                    <li><a href="lw-index.html">欢迎登陆:{{ session['VipUser']['email'] }}!!</a></li>
+                    <li><a href="{{ url_for('home.logout') }}">退出</a></li>
+                {% else %}
+                    <li>
+                        <a href="{{ url_for('home.login') }}">登录</a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('home.register') }}">注册</a>
+                    </li>
+                {% endif %}
+            </ul>
+            <form action="{{ url_for('home.blogssearch') }}" method="GET" class="am-topbar-form am-topbar-right am-form-inline" role="search">
+                <div class="am-form-group">
+                    <input name="keywords" type="text" class="am-form-field am-input-sm" placeholder="搜索">
+                    <button style='border:none;background: #fff;'>
+                        <i class="am-icon-search"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </nav>
+{% endblock %}
+
+{% block con %}
+<div class="am-g am-g-fixed blog-fixed">
+    {% block conleft %}
+         <div class="am-u-md-4 am-u-sm-12 blog-sidebar">
+            <center>
+            <a type="button" class="am-btn am-btn-danger am-radius" href="{{ url_for('home.editinfo') }}">编辑个人信息</a>
+            </center>
+            <br>
+            <br>
+            <br>
+            <div class="blog-sidebar-widget blog-bor">
+                <h2 class="blog-text-center blog-title"><span>About ME</span></h2>
+                <img src='{{ ob.face }}' alt="about me" class="blog-entry-img">
+                <p>{{ ob.name }}</p>
+                <p>{{ ob.info|d('这个人很懒,P都没留下',true) }}</p>
+            </div>
+            <div class="blog-sidebar-widget blog-bor">
+                <h2 class="blog-text-center blog-title"><span>Contact ME</span></h2>
+                <p>
+                    <a href="javascript:;"><span class="am-icon-qq am-icon-fw am-primary blog-icon"></span></a>
+                    <a href="javascript:;"><span class="am-icon-github am-icon-fw blog-icon"></span></a>
+                    <a href="javascript:;"><span class="am-icon-weibo am-icon-fw blog-icon"></span></a>
+                    <a href="javascript:;"><span class="am-icon-reddit am-icon-fw blog-icon"></span></a>
+                    <a href="javascript:;"><span class="am-icon-weixin am-icon-fw blog-icon"></span></a>
+                </p>
+            </div>
+            <div class="blog-clear-margin blog-sidebar-widget blog-bor am-g ">
+                <h2 class="blog-title">
+                    <span>TAG cloud</span>
+                </h2>
+                <div class="am-u-sm-12 blog-clear-padding">
+                    {% for v in 'a'| gettagsall %}
+                        <a href="{{ url_for('home.tagsblogs',tid=v.id) }}" class="blog-tag">{{ v.name }}</a>
+                    {% endfor %}
+                </div>
+            </div> 
+        </div>
+    {% endblock %}
+
+    {% block conright %}
+       <div class="am-u-md-8 am-u-sm-12">
+        {% if ob.posts %}
+            
+            {% for i in posts.items %}
+                <article class="am-g blog-entry-article"> 
+                    <div class="am-u-lg-6 am-u-md-12 am-u-sm-12 blog-entry-text">
+                        <span>作者 &nbsp;</span>
+                        <span>
+                            <a href="{{ url_for('home.userblogs',uid=ob.id) }}" class="blog-color">@{{ ob.name }} &nbsp;
+                            </a>
+                        </span> <br>
+                        <span>{{ i.addtime }}</span><br>
+                        <h1><a href="{{ url_for('home.bloginfo',pid=i.id)}}">{{ i.title }}</a></h1>
+                      
+                        <!-- <span>{{ i.context|safe }}</span> -->
+                    </div>
+                </article>
+            {% endfor %}
+            
+            <ul class="am-pagination">
+                <li id="first_page" {% if request.args.get('p')|int == 1 %} class="am-disabled" {% endif %}>
+                    <a href="javascript:;">首页</a>
+                </li>
+                <li id="left_btn" {% if request.args.get('p')|int == 1 %} class="am-disabled" {% endif %}>
+                    <a href="javascript:;">«</a>
+                </li>
+               
+                {% for v in posts.iter_pages() %}
+                <li {% if v == request.args.get('p',1)|int %} class="am-active" {% endif %}>
+                    <a class="cli" href="{% if v %} ?p={{ v }} {% else %} javascript:void(0) {% endif %}">{{ v|d('...',true) }}</a>
+                </li>
+                {% endfor %}
+                
+                <li id="right_btn" {% if request.args.get('p')|int == a | length %} class="am-disabled" {% endif %}>
+                    <a href="javascript:;">»</a>
+                </li>
+                <li id="last_page" {% if request.args.get('p')|int == a | length %} class="am-disabled" {% endif %}>
+                    <a href="javascript:;">尾页</a>
+                </li>
+            </ul>
+
+        {% else %}
+            <div class="am-u-md-8 am-u-sm-12">
+                <article class="am-g blog-entry-article"> 
+                    <h2>该用户暂时没有文章......</h2>
+                </article>  
+            </div>
+        {% endif %}
+        </div>
+        <script type="text/javascript">
+            $('#first_page').click(function(){
+                $(".am-pagination li").eq(2).find('.cli').append("<span></span>");
+                $(".am-pagination li").eq(2).find('.cli span').click();
+            })
+
+
+            $('#left_btn').click(function(){
+                var num = {{ request.args.get('p',1) }}
+                // alert(num)
+                $(".am-pagination li").eq(num).find('.cli').append("<span></span>");
+                $(".am-pagination li").eq(num).find('.cli span').click();
+            })
+
+            $('#right_btn').click(function(){
+                var num = {{ request.args.get('p',1) }}
+                // alert(num);
+                $(".am-pagination li").eq(num+2).find('.cli').append("<span></span>");
+                $(".am-pagination li").eq(num+2).find('.cli span').click();
+            })
+
+            $('#last_page').click(function(){
+                var num = {{ b }}
+                $(".am-pagination li").eq(num+1).find('.cli').append("<span></span>");
+                $(".am-pagination li").eq(num+1).find('.cli span').click();
+            })
+        </script>
+    {% endblock %}
+</div>
+{% endblock %}
+

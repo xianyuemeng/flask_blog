@@ -1,0 +1,127 @@
+{% extends 'admin/index.html' %}
+
+{% block search %}
+<form class="navbar-search pull-left" action="{{ url_for('admin.user_search') }}">
+    <input type="hidden" name="p" value=1>
+    <input name="keywords" type="text" class="search-query span2" placeholder="搜索用户" />
+    <button style='border:none;background: #F8F8F8;'>
+        <i class="icon-search"></i>
+    </button>
+</form>
+{% endblock %}
+
+{% block con %}
+
+<div class="span9">
+    <h1>
+        用户列表
+    </h1>
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>用户编号</th>
+                <th>用户名</th>
+                <th>手机号</th>
+                <th>发布博文数量 </th>
+                <th>评论次数</th>
+                <th>状态</th>
+                <th>注册时间</th>
+                <th>查看</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for v in users.items %}
+            <tr>
+                <td>{{ v.id }}</td>
+                <td>{{ v.name }}</td>
+                <td>{{ v.phone }}</td>
+                <td>{{ v.posts|length }}</td>
+                <td>{{ v.comments|length }}</td>
+                <td>
+                    <select name="status" uid="{{ v.id }}" style="width: 100px;">
+                        <option value="0" {% if v.status == 0 %} selected  {% endif %}>正常</option>
+                        <option value="1" {% if v.status == 1 %} selected  {% endif %}>禁用</option>
+                    </select>
+                </td>
+                    
+                <td>{{ v.addtime }}</td>
+                <td>
+                    <a href="{{ url_for('home.userblogs', uid=v.id)}}" class="view-link">查看ta的博客</a>
+                </td>
+            </tr>
+            {% endfor %}
+            
+        </tbody>
+    </table>                
+    <div class="pagination">
+        <ul>
+            <li id="first_page" {% if request.args.get('p')|int == 1 %} class="disabled" {% endif %}>
+                <a href="javascript:;">首页</a>
+            </li>
+            <li id="left_btn" {% if request.args.get('p')|int == 1 %} class="disabled" {% endif %}>
+                <a href="javascript:;">«</a>
+            </li>
+           
+            {% for v in users.iter_pages() %}
+                {% if not request.args.get('keywords') == '' %}
+                <li {% if v == request.args.get('p',1)|int %} class="active" {% endif %}>
+                    <a class="cli" href="{% if v %} ?p={{ v }} {% else %} javascript:void(0) {% endif %}"  >{{ v|d('...',true) }}</a>
+                </li>
+                {% else %}
+                 <li {% if v == request.args.get('p',1)|int %} class="active" {% endif %}>
+                    <a class="cli" href="{% if v %} ?p={{ v }}&keywords={{request.args.get('keywords')}} {% else %} javascript:void(0) {% endif %}"  >{{ v|d('...',true) }}</a>
+                </li>
+                {% endif %}
+            {% endfor %}
+            
+            <li id="right_btn" {% if request.args.get('p')|int == a | length %} class="disabled" {% endif %}>
+                <a href="javascript:;">»</a>
+            </li>
+            <li id="last_page" {% if request.args.get('p')|int == a | length %} class="disabled" {% endif %}>
+                <a href="javascript:;">尾页</a>
+            </li>
+
+
+        </ul>
+    </div>
+</div>
+
+
+
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+    $('select[name=status]').change(function(){
+        var v = $(this).val()
+        var uid = $(this).attr('uid')
+        // 发送ajax
+        $.get('{{ url_for("admin.useredit")}}',{'status':v,'uid':uid},function(data){
+            alert(data['msg'])
+        },'json')
+    })
+    
+    $('#first_page').click(function(){
+        $(".pagination ul li").eq(2).find('.cli').append("<span></span>")
+        $(".pagination ul li").eq(2).find('.cli span').click()
+    })
+
+    $('#left_btn').click(function(){
+        var num = {{ request.args.get('p',1) }}
+        $(".pagination ul li").eq(num).find('.cli').append("<span></span>")
+        $(".pagination ul li").eq(num).find('.cli span').click()
+    })
+
+    $('#right_btn').click(function(){
+        var num = {{ request.args.get('p',1) }}
+        $(".pagination ul li").eq(num+2).find('.cli').append("<span></span>")
+        $(".pagination ul li").eq(num+2).find('.cli span').click()
+    })
+
+    $('#last_page').click(function(){
+        var num = {{ b }}
+        $(".pagination ul li").eq(num+1).find('.cli').append("<span></span>")
+        $(".pagination ul li").eq(num+1).find('.cli span').click()
+    })
+</script>
+{% endblock %}

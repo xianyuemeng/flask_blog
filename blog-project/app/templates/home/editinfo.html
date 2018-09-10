@@ -1,0 +1,114 @@
+{% extends 'home/base.html' %}
+
+{% block nav %}
+    <nav class="am-g am-g-fixed blog-fixed blog-nav">
+        <button class="am-topbar-btn am-topbar-toggle am-btn am-btn-sm am-btn-success am-show-sm-only blog-button" data-am-collapse="{target: '#blog-collapse'}">
+            <span class="am-sr-only">导航切换</span>
+            <span class="am-icon-bars"></span>
+        </button>
+        <div class="am-collapse am-topbar-collapse" id="blog-collapse">
+            <ul class="am-nav am-nav-pills am-topbar-nav">
+                <li class="">
+                    <a href="{{ url_for('home.home', p=1) }}">首页</a>
+                </li>
+                {% if session['VipUser'] %}
+                    <li class="am-active"><a href="{{ url_for('home.myinfo') }}">个人中心</a></li>
+                    <li><a href="{{ url_for('home.createblog') }}">发布博文</a></li>
+                    <li><a href="lw-index.html">欢迎登陆:{{ session['VipUser']['email'] }}!!</a></li>
+                    <li><a href="{{ url_for('home.logout') }}">退出</a></li>
+                {% else %}
+                    <li>
+                        <a href="{{ url_for('home.login') }}">登录</a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('home.register') }}">注册</a>
+                    </li>
+                {% endif %}
+            </ul>
+            <form action="{{ url_for('home.blogssearch') }}" method="GET" class="am-topbar-form am-topbar-right am-form-inline" role="search">
+                <div class="am-form-group">
+                    <input name="keywords" type="text" class="am-form-field am-input-sm" placeholder="搜索">
+                    <button style='border:none;background: #fff;'>
+                        <i class="am-icon-search"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </nav>
+{% endblock %}
+
+{% block con %}
+<div class="am-g am-g-fixed blog-fixed">
+        
+    
+    <div class="am-u-md-12 am-u-sm-12 blog-sidebar">
+        <form method="POST" action="{{ url_for('home.update') }}" enctype="multipart/form-data" class="am-form am-form-horizontal">
+            <div class="am-form-group">
+                <label for="user-name" class="am-u-sm-2 am-form-label">用户名</label>
+                <div class="am-u-sm-10">
+                    <input name="name" type="text" value="{{ ob.name }}" class="tpl-form-input" placeholder="请输入用户名" />
+                </div>
+            </div>
+            <div class="am-form-group">
+                <label for="user-name" class="am-u-sm-2 am-form-label">密码</label>
+                <div class="am-u-sm-10">
+                    <input name="pwd" type="password" value="" class="tpl-form-input" placeholder="请填写密码" />
+                </div>
+            </div>
+            <div class="am-form-group">
+                <label for="user-name" class="am-u-sm-2 am-form-label">手机号</label>
+                <div class="am-u-sm-10">
+                    <input name="phone" type="text" value="{{ ob.phone }}" class="tpl-form-input" placeholder="请输入手机号" /></div>
+            </div>
+            <div class="am-form-group">
+                <label for="user-name" class="am-u-sm-2 am-form-label">年龄</label>
+                <div class="am-u-sm-10">
+                    <input name="age" type="text" value="{{ ob.age }}" class="tpl-form-input" placeholder="请输入年龄" /></div>
+            </div>
+            <div class="am-form-group">
+                <label for="doc-ta-1" class="am-u-sm-2 am-form-label">个人说明</label>
+                <div class="am-u-sm-10">
+                    <textarea name="info" class="" rows="5" id="doc-ta-1" placeholder="请写入简短的个人说明......">{{ ob.info | default('请写入简短的个人说明......',true) }}</textarea>
+                </div>
+            </div>
+
+            <div class="am-form-group">
+                <label for="user-name" class="am-u-sm-2 am-form-label">性别</label>
+                <div class="am-u-sm-10">
+                    <label class="am-radio-inline">
+                        <input type="radio" value=0 {% if ob.sex == 0 %} checked {% endif %} name="sex">女
+                    </label>
+                    <label class="am-radio-inline">
+                        <input type="radio" value=1 {% if ob.sex == 1 %} checked {% endif %} name="sex">男
+                    </label>
+                </div>
+            </div>
+            <div class="am-form-group">
+                <label for="user-weibo" class="am-u-sm-2 am-form-label">上传头像</label>
+                <div class="am-u-sm-10">
+                    <div class="am-form-group am-form-file">
+                        <div class="tpl-form-file-img">
+                            <img width="200" id="xmTanImg" src="{{ ob.face }}" alt="" class="ppic" /></div>
+                        <input name="face" type="file" multiple="" />
+                        <button type="button" class="am-btn am-btn-danger am-btn-sm">
+                            <i class="am-icon-cloud-upload"></i>修改头像</button>
+                    </div>
+                    <div class="am-form-group am-form-file">
+                        <input type="button" class="am-btn am-btn-danger am-btn-sm" value="隐藏图片" onclick="document.getElementById('xmTanImg').style.display = 'none';" />
+                        <input type="button" class="am-btn am-btn-danger am-btn-sm" value="显示图片" onclick="document.getElementById('xmTanImg').style.display = 'block';" />
+                        <input type="button" class="am-btn am-btn-danger am-btn-sm" value="删除图片" onclick="document.getElementById('xmTanImg').src='';" />
+                        <input type="button" class="am-btn am-btn-danger am-btn-sm" value="默认头像" onclick="document.getElementById('xmTanImg').src='/static/home/images/mxy.jpg';" />
+                    </div>
+                </div>
+            </div>
+            <div class="am-form-group">
+                <div class="am-u-sm-12 am-u-sm-push-3">
+                    <button class="am-btn am-btn-success tpl-btn-bg-color-success ">修改</button>
+                </div>
+            </div>
+        </form>
+
+    </div>
+</div>
+<script src="/static/admin/js/picchange.js"></script>
+{% endblock %}

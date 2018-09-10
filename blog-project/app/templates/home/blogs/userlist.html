@@ -1,0 +1,109 @@
+{% extends 'home/base.html' %}
+
+{% block conleft %}
+<div class="am-u-md-8 am-u-sm-12">
+    {% if posts %}
+        {% for v in posts.items %}
+        <article class="am-g blog-entry-article">
+            <div class="am-u-lg-6 am-u-md-12 am-u-sm-12 blog-entry-text">
+            <span><a href="{{ url_for('home.userblogs',uid=v.uid) }}" class="blog-color">@{{ v.user.name }} &nbsp;</a></span>
+            <span>{{ v.addtime }}</span>
+            <h1><a href="{{ url_for('home.bloginfo',pid=v.id) }}">{{ v.title }}</a></h1>
+
+            <div class="context">
+
+            </div>
+            <p><a href="" class="blog-continue">continue reading</a></p>
+            </div>
+        </article>
+        {% endfor %}
+    {% else %}
+        <article class="am-g blog-entry-article"> 
+            <h2>该用户暂时没有文章哦......</h2>
+        </article>  
+    {% endif %}
+    <ul class="am-pagination">
+        <li id="first_page" {% if request.args.get('p')|int == 1 %} class="am-disabled" {% endif %}>
+            <a href="avascript:void 0;">首页</a>
+        </li>
+        <li id="left_btn" {% if request.args.get('p')|int == 1 %} class="am-disabled" {% endif %}>
+            <a href="javascript:;">«</a>
+        </li>
+       
+        {% for v in posts.iter_pages() %}
+        <li {% if v == request.args.get('p',1)|int %} class="am-active" {% endif %}>
+            <a class="cli" href="{% if v %} ?p={{ v }} {% else %} javascript:void(0) {% endif %}">{{ v|d('...',true) }}</a>
+        </li>
+        {% endfor %}
+        
+        <li id="right_btn" {% if request.args.get('p')|int == a | length %} class="am-disabled" {% endif %}>
+            <a href="javascript:;">»</a>
+        </li>
+        <li id="last_page" {% if request.args.get('p')|int == a | length %} class="am-disabled" {% endif %}>
+            <a href="javascript:void 0;">尾页</a>
+        </li>
+    </ul>
+</div>
+<script type="text/javascript">
+    $('#first_page').click(function(){
+        $(".am-pagination li").eq(2).find('.cli').append("<span></span>");
+        $(".am-pagination li").eq(2).find('.cli span').click();
+    })
+
+
+    $('#left_btn').click(function(){
+        var num = {{ request.args.get('p',1) }}
+        // alert(num)
+        $(".am-pagination li").eq(num).find('.cli').append("<span></span>");
+        $(".am-pagination li").eq(num).find('.cli span').click();
+    })
+
+    $('#right_btn').click(function(){
+        var num = {{ request.args.get('p',1) }}
+        // alert(num);
+        $(".am-pagination li").eq(num+2).find('.cli').append("<span></span>");
+        $(".am-pagination li").eq(num+2).find('.cli span').click();
+    })
+
+    $('#last_page').click(function(){
+        var num = {{ b }}
+        $(".am-pagination li").eq(num+1).find('.cli').append("<span></span>");
+        $(".am-pagination li").eq(num+1).find('.cli span').click();
+    })
+</script>
+{% endblock %}
+
+{% block conright %}
+    <div class="am-u-md-4 am-u-sm-12 blog-sidebar">
+        <div class="blog-sidebar-widget blog-bor">
+            <h2 class="blog-text-center blog-title"><span>About ME</span></h2>
+            <img src='{{ user.face }}' alt="about me" class="blog-entry-img">
+            <p>{{ user.name }}</p>
+            <p>{{ user.info|d('这个人很懒,P都没留下',true) }}</p>
+        </div>
+
+        <div class="blog-sidebar-widget blog-bor">
+            <h2 class="blog-text-center blog-title"><span>Contact ME</span></h2>
+            <p>
+                <a href="javascript:;"><span class="am-icon-qq am-icon-fw am-primary blog-icon"></span></a>
+                <a href="javascript:;"><span class="am-icon-github am-icon-fw blog-icon"></span></a>
+                <a href="javascript:;"><span class="am-icon-weibo am-icon-fw blog-icon"></span></a>
+                <a href="javascript:;"><span class="am-icon-reddit am-icon-fw blog-icon"></span></a>
+                <a href="javascript:;"><span class="am-icon-weixin am-icon-fw blog-icon"></span></a>
+            </p>
+        </div>
+        <div class="blog-clear-margin blog-sidebar-widget blog-bor am-g ">
+            <h2 class="blog-title">
+                <span>TAG cloud</span>
+            </h2>
+            <div class="am-u-sm-12 blog-clear-padding">
+                {% for v in 'a'| gettagsall %}
+                    <a href="{{ url_for('home.tagsblogs',tid=v.id) }}" class="blog-tag">{{ v.name }}</a>
+                {% endfor %}
+            </div>
+        </div>
+        
+    </div>
+{% endblock %}
+
+

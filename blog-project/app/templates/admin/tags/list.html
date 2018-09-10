@@ -1,0 +1,183 @@
+{% extends 'admin/index.html' %}
+
+{% block search %}
+<form class="navbar-search pull-left" action="{{ url_for('admin.tags_search') }}">
+    <input type="hidden" name="p" value=1>
+    <input name="keywords" type="text" class="search-query span2" placeholder="搜索标签" />
+    <button style='border:none;background: #F8F8F8;'>
+        <i class="icon-search"></i>
+    </button>
+</form>
+{% endblock %}
+
+{% block con %}
+
+<div class="span9">
+    <h1>
+        标签列表
+    </h1>
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>标签编号</th>
+                <th>标签名</th>
+                <th>博文数量 </th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-success btn-lg" data-toggle="modal" data-target="#myModal">
+            添加标签
+        </button>
+
+        <!-- Modal -->
+        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+            <div class="modal-dialog" role="document">
+                <form action="{{ url_for('admin.tagsadd') }}" method="POST">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                            <h4 class="modal-title" id="myModalLabel">添加标签:</h4>
+                        </div>
+                        <input type="text" name="po" style="width:98%;border:none;" placeholder="请输入标签名">
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                            <button class="btn btn-success">保存</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <br>
+        <br>
+        <tbody>
+            {% for v in tags.items %}
+            <tr>
+                <td>{{ v.id }}</td>
+                <td class="setname" tid="{{ v.id }}">{{ v.name }}</td>
+                <td>{{ v.posts|length }}</td>
+                
+                <td>
+                    <a href="{{ url_for('home.tagsblogs',tid=v.id) }}" class="view-link" style="color:#076F63;">查看</a>
+                    <a tid="{{ v.id }}" href="javascript:void 0;" class="view-link dele" style="color:#EB5350;">删除</a>
+                </td>
+            </tr>
+            {% endfor %}
+            
+        </tbody>
+    </table>                
+    <div class="pagination">
+        <ul>
+            <li id="first_page" {% if request.args.get('p')|int == 1 %} class="disabled" {% endif %}>
+                <a href="javascript:;">首页</a>
+            </li>
+
+            <li id="left_btn" {% if request.args.get('p')|int == 1 %} class="disabled" {% endif %}>
+                <a href="javascript:;">«</a>
+            </li>
+           
+            {% for v in tags.iter_pages() %}
+
+                {% if not request.args.get('keywords') == '' %}
+                <li {% if v == request.args.get('p',1)|int %} class="active" {% endif %}>
+                    <a class="cli" href="{% if v %} ?p={{ v }} {% else %} javascript:void(0) {% endif %}"  >{{ v|d('...',true) }}</a>
+                </li>
+                {% else %}
+                 <li {% if v == request.args.get('p',1)|int %} class="active" {% endif %}>
+                    <a class="cli" href="{% if v %} ?p={{ v }}&keywords={{request.args.get('keywords')}} {% else %} javascript:void(0) {% endif %}"  >{{ v|d('...',true) }}</a>
+                </li>
+                {% endif %}
+            {% endfor %}
+            
+            <li id="right_btn" {% if request.args.get('p')|int == a | length %} class="disabled" {% endif %}>
+                <a href="javascript:;">»</a>
+            </li>
+
+            <li id="last_page" {% if request.args.get('p')|int == a | length %} class="disabled" {% endif %}>
+                <a href="javascript:;">尾页</a>
+            </li>
+        </ul>
+    </div>
+    </div>
+
+
+
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+    $('.dele').click(function(){
+        // 获取当前的pid
+        var tid = $(this).attr('tid');
+        // 此处的 $(this) 是想要的对象,赋值给一个变量,拱后面的ajax的回调函数使用
+        var td = $(this);
+        // alert(pid)
+
+        // 发送ajax
+        $.get('{{ url_for("admin.tagsdel") }}',{'tid':tid},function(data){
+            // 删除成功,就移出当前的整个tr的数据
+            td.parents('tr').remove();
+            // 提示弹出的信息
+            alert(data['msg']);
+        },'json')
+    })
+
+    $('#first_page').click(function(){
+        $(".pagination ul li").eq(2).find('.cli').append("<span></span>")
+        $(".pagination ul li").eq(2).find('.cli span').click()
+    })
+
+    $('#left_btn').click(function(){
+        var num = {{ request.args.get('p',1) }}
+        $(".pagination ul li").eq(num).find('.cli').append("<span></span>")
+        $(".pagination ul li").eq(num).find('.cli span').click()
+    })
+
+    $('#right_btn').click(function(){
+        var num = {{ request.args.get('p',1) }}
+        $(".pagination ul li").eq(num+2).find('.cli').append("<span></span>")
+        $(".pagination ul li").eq(num+2).find('.cli span').click()
+    })
+
+    $('#last_page').click(function(){
+        var num = {{ b }}
+        $(".pagination ul li").eq(num+1).find('.cli').append("<span></span>")
+        $(".pagination ul li").eq(num+1).find('.cli span').click()
+    })
+
+    $('.setname').dblclick(function(){
+        // 获取分类的id
+        var tid = $(this).attr('tid');
+        // 获取内容
+        var tags = $(this).text();
+
+        // 创建input
+        var inp = $('<input value="'+tags+'" style="color:black; width:100px;" type="text" />');
+        var td = $(this);
+        // 把创建好的input标签加入到td中
+        $(this).html(inp);
+        // 让input的内容选中
+        inp.select();
+        // alert(tags)
+
+        // 给input绑定丧失焦点事件
+        inp.blur(function(){
+            var newtags = $(this).val();
+            // 判断是否修改了分类名
+            if(newtags == tags){
+                // 不用发送ajax修改,直接恢复原样就可以
+                td.html(tags);
+            }else{
+                // 发送ajax请求,修改数据
+                $.get('{{ url_for("admin.tagsupdate") }}', {'tid': tid, 'title': newtags}, function(data){
+                    // alert(data['info'])
+                    td.html(data['info'])
+                },'json')
+                alert('标签名修改为:'+newtags)
+            }
+        })
+
+    })
+
+</script>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends 'home/base.html' %}
+
+
+{% block conleft %}
+<div class="am-u-md-8 am-u-sm-12">
+
+    <h2>相关
+        <span style="color: #FF7259">博文</span>
+        搜索结果:&nbsp;&nbsp;&nbsp;&nbsp;
+        <span style="color: #FF7259">{{ request.args.get('keywords')}}</span>
+    </h2>
+    {% for v in blogs %}
+    <article class="am-g blog-entry-article">
+        <div class="am-u-lg-6 am-u-md-12 am-u-sm-12 blog-entry-text">
+        <span><a href="{{ url_for('home.userblogs',uid=v.uid) }}" class="blog-color">@{{ v.user.name }} &nbsp;</a></span>
+        <span>{{ v.addtime }}</span>
+        <h3><a href="{{ url_for('home.bloginfo', pid=v.id) }}">{{ v.title }}</a></h3>
+        </div>
+    </article>
+    {% endfor %}
+
+
+    <h2>相关
+        <span style="color: #FF7259">用户</span>
+        搜索结果:&nbsp;&nbsp;&nbsp;&nbsp;
+        <span style="color: #FF7259">{{ request.args.get('keywords')}}</span></h2>
+    <ul class="am-nav am-nav-pills am-topbar-nav">
+    {% for v in users %}
+        <div>
+            <li>
+                <a href="{{ url_for('home.userblogs',uid=v.id) }}">
+                    <span style="color: #182029">博主:</span>
+                    <span style="color: #FF7259">{{ v.name }}</span>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <span style="color: #182029">博文:</span>
+                    <span style="color: #FF7259">{{ v.posts|count }}</span><br>
+                </a>
+                <span>{{ v.info|d('这个人很懒,P都没留下',true) }}</span>  
+            </li>
+        </div>
+        <br>
+    {% endfor %}
+    </ul>
+</div>
+
+{% endblock %}

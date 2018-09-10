@@ -1,0 +1,127 @@
+{% extends 'admin/index.html' %}
+
+{% block search %}
+<form class="navbar-search pull-left" action="{{ url_for('admin.comments_search') }}">
+    <input type="hidden" name="p" value=1>
+    <input name="keywords" type="text" class="search-query span2" placeholder="搜索评论" />
+    <button style='border:none;background: #F8F8F8;'>
+        <i class="icon-search"></i>
+    </button>
+</form>
+{% endblock %}
+
+{% block con %}
+
+<div class="span9">
+    <h1>
+        评论列表
+    </h1>
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>评论编号</th>
+                <th>评论者</th>
+                <th>评论博文</th>
+                <th>评论内容</th>
+                <th>回复数量</th>
+                <th>评论时间</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for v in comments.items %}
+            <tr>
+                <td>{{ v.id }}</td>
+                <td>{{ v.user.name }}</td>
+                <td>{{ v.posts.title }}</td>
+                <td>{{ v.context | truncate(13, True) }}</td>
+                <td>{{ v.reply|length }}</td>
+                <td>{{ v.addtime }}</td>
+                <td>
+                    <a href="{{ url_for('home.bloginfo',pid=v.id) }}" class="view-link" style="color:#076F63;">查看</a>
+                    <a cid="{{ v.id }}" href="javascript:void 0;" class="view-link dele" style="color:#EB5350;">删除</a>
+                </td>
+              
+            </tr>
+            {% endfor %}
+            
+        </tbody>
+    </table>                
+    <div class="pagination">
+        <ul>
+           
+            <li id="first_page" {% if request.args.get('p')|int == 1 %} class="disabled" {% endif %}>
+                <a href="javascript:;">首页</a>
+            </li>
+            <li id="left_btn" {% if request.args.get('p')|int == 1 %} class="disabled" {% endif %}>
+                <a href="javascript:;">«</a>
+            </li>
+            {% for v in comments.iter_pages() %}
+                {% if not request.args.get('keywords') == '' %}
+                    <li {% if v == request.args.get('p',1)|int %} class="active" {% endif %}>
+                        <a class="cli" href="{% if v %} ?p={{ v }} {% else %} javascript:void(0) {% endif %}"  >{{ v|d('...',true) }}</a>
+                    </li>
+                {% else %}
+                    <li {% if v == request.args.get('p',1)|int %} class="active" {% endif %}>
+                        <a class="cli" href="{% if v %} ?p={{ v }}&keywords={{request.args.get('keywords')}} {% else %} javascript:void(0) {% endif %}"  >{{ v|d('...',true) }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+            
+            <li id="right_btn" {% if request.args.get('p')|int == a | length %} class="disabled" {% endif %}>
+                <a href="javascript:;">»</a>
+            </li>
+
+            <li id="last_page" {% if request.args.get('p')|int == a | length %} class="disabled" {% endif %}>
+                <a href="javascript:;">尾页</a>
+            </li>
+        </ul>
+    </div>
+    </div>
+
+
+
+{% endblock %}
+
+{% block js %}
+<script type="text/javascript">
+    $('.dele').click(function(){
+        // 获取当前的pid
+        var cid = $(this).attr('cid');
+        // 此处的 $(this) 是想要的对象,赋值给一个变量,拱后面的ajax的回调函数使用
+        var td = $(this);
+        // alert(pid)
+
+        // 发送ajax
+        $.get('{{ url_for("admin.commentsdel") }}',{'cid':cid},function(data){
+            // 删除成功,就移出当前的整个tr的数据
+            td.parents('tr').remove();
+            // 提示弹出的信息
+            alert(data['msg']);
+        },'json')
+    })
+
+    $('#first_page').click(function(){
+        $(".pagination ul li").eq(2).find('.cli').append("<span></span>")
+        $(".pagination ul li").eq(2).find('.cli span').click()
+    })
+
+    $('#left_btn').click(function(){
+        var num = {{ request.args.get('p',1) }}
+        $(".pagination ul li").eq(num).find('.cli').append("<span></span>")
+        $(".pagination ul li").eq(num).find('.cli span').click()
+    })
+
+    $('#right_btn').click(function(){
+        var num = {{ request.args.get('p',1) }}
+        $(".pagination ul li").eq(num+2).find('.cli').append("<span></span>")
+        $(".pagination ul li").eq(num+2).find('.cli span').click()
+    })
+
+    $('#last_page').click(function(){
+        var num = {{ b }}
+        $(".pagination ul li").eq(num+1).find('.cli').append("<span></span>")
+        $(".pagination ul li").eq(num+1).find('.cli span').click()
+    })
+</script>
+{% endblock %}

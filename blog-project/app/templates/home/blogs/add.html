@@ -1,0 +1,100 @@
+{% extends 'home/base.html' %}
+
+{% block nav %}
+        <nav class="am-g am-g-fixed blog-fixed blog-nav">
+            <button class="am-topbar-btn am-topbar-toggle am-btn am-btn-sm am-btn-success am-show-sm-only blog-button" data-am-collapse="{target: '#blog-collapse'}">
+                <span class="am-sr-only">导航切换</span>
+                <span class="am-icon-bars"></span>
+            </button>
+            <div class="am-collapse am-topbar-collapse" id="blog-collapse">
+                <ul class="am-nav am-nav-pills am-topbar-nav">
+                    <li>
+                        <a href="{{ url_for('home.home', p=1) }}">首页</a>
+                    </li>
+                    {% if session['VipUser'] %}
+                        <li><a href="{{ url_for('home.myinfo') }}">个人中心</a></li>
+                        <li class="am-active"><a href="{{ url_for('home.createblog') }}">发布博文</a></li>
+                        <li><a href="lw-index.html">欢迎登陆:{{ session['VipUser']['email'] }}!!</a></li>
+                        <li><a href="{{ url_for('home.logout') }}">退出</a></li>
+                    {% else %}
+                        <li>
+                            <a href="{{ url_for('home.login') }}">登录</a>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('home.register') }}">注册</a>
+                        </li>
+                    {% endif %}
+                </ul>
+                <form action="{{ url_for('home.blogssearch') }}" method="GET" class="am-topbar-form am-topbar-right am-form-inline" role="search">
+                    <div class="am-form-group">
+                        <input name="keywords" type="text" class="am-form-field am-input-sm" placeholder="搜索">
+                        <button style='border:none;background: #fff;'>
+                            <i class="am-icon-search"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </nav>
+        {% endblock %}
+
+{% block con %}
+<form action="/createblog" method="POST" class="am-form am-g">
+    <h2 class="blog-comment">发布文章</h2>
+    <fieldset>
+        <div class="am-form-group am-u-sm-12 blog-clear-left">
+            <input name="title" type="text" class="" placeholder="文章标题"></div>
+        <div class="am-form-group am-u-sm-12 blog-clear-left">
+            <p>
+                <b>选择标签</b>
+            </p>
+            <div class="am-u-sm-6  am-fl">
+                <label>可选标签</label>
+                <select multiple="multiple" class="" id="one">
+                    {% for v in tags %}
+                    <option value="{{ v.id }}">{{ v.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="am-u-sm-6  am-fl">
+                <label>已选标签</label>
+                <select name="tags" multiple="multiple" class="" id="two"></select>
+            </div>
+        </div>
+        <div class="am-form-group">
+            <p>博文内容编辑</p>
+            <!-- 配置文件 -->
+            <script type="text/javascript" src="/static/ueditor/ueditor.config.js"></script>
+            <!-- 编辑器源码文件 -->
+            <script type="text/javascript" src="/static/ueditor/ueditor.all.js"></script>
+            <!-- 加载编辑器的容器 -->
+            <script id="aabbcc" name="context" type="text/plain">这里写你的初始化内容</script>
+            <!-- 实例化编辑器 -->
+            <script type="text/javascript">
+                var ue = UE.getEditor('aabbcc', {
+                    serverUrl: '/ueditconfig/'
+                });
+            </script>
+        </div>
+        <p>
+            <button id="sub" type="submit" class="am-btn am-btn-default">发表文章</button>
+        </p>
+    </fieldset>
+</form>
+<script type="text/javascript">
+    $('#one option').dblclick(function(){
+        $('#two').append($(this));
+        $(this).attr('selected', false);
+    }) 
+
+    $('#two').on('dblclick', 'option',
+    function() {
+        $('#one').append($(this)); 
+        $(this).attr('selected', false);
+    })
+
+    $('#sub').click(function() {
+        // $('#select2 option').attr('selected',true) //X
+        $('#two option').prop('selected', true);
+    })
+</script>
+{% endblock %}

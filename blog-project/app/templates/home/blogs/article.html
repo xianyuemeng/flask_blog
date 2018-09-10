@@ -1,0 +1,297 @@
+{% extends 'home/base.html' %}
+
+{% block nav %}
+        <nav class="am-g am-g-fixed blog-fixed blog-nav">
+            <button class="am-topbar-btn am-topbar-toggle am-btn am-btn-sm am-btn-success am-show-sm-only blog-button" data-am-collapse="{target: '#blog-collapse'}">
+                <span class="am-sr-only">导航切换</span>
+                <span class="am-icon-bars"></span>
+            </button>
+            <div class="am-collapse am-topbar-collapse" id="blog-collapse">
+                <ul class="am-nav am-nav-pills am-topbar-nav">
+                    <li class="am-active">
+                        <a href="{{ url_for('home.home', p=1) }}">首页</a>
+                    </li>
+                    {% if session['VipUser'] %}
+                        <li><a href="{{ url_for('home.myinfo') }}">个人中心</a></li>
+                        <li><a href="{{ url_for('home.createblog') }}">发布博文</a></li>
+                        <li><a href="lw-index.html">欢迎登陆:{{ session['VipUser']['email'] }}!!</a></li>
+                        <li><a href="{{ url_for('home.logout') }}">退出</a></li>
+                    {% else %}
+                        <li>
+                            <a href="{{ url_for('home.login') }}">登录</a>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('home.register') }}">注册</a>
+                        </li>
+                    {% endif %}
+                </ul>
+                <form action="{{ url_for('home.blogssearch') }}" method="GET" class="am-topbar-form am-topbar-right am-form-inline" role="search">
+                    <div class="am-form-group">
+                        <input name="keywords" type="text" class="am-form-field am-input-sm" placeholder="搜索">
+                        <button style='border:none;background: #fff;'>
+                            <i class="am-icon-search"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </nav>
+        {% endblock %}
+
+{% block con %}
+
+<div class="am-g am-g-fixed blog-fixed">
+{% block conleft %}
+    <div class="am-u-md-8 am-u-sm-12">
+        <article class="am-article blog-article-p">
+            <div class="am-article-hd">
+                <h1 class="am-article-title blog-text-center">{{ blog.title }}</h1>
+                <p class="am-article-meta blog-text-center">
+                 
+                    <span>
+                        <a href="{{ url_for('home.userblogs',uid=blog.uid) }}">@{{ blog.user.name }} &nbsp;</a>
+                    </span>-
+                    <span>{{ blog.addtime }}</span>
+                </p>
+            </div>
+            <div class="am-article-bd">
+                {{ blog.context|safe }}   
+             
+            </div>
+        </article>
+        <div class="am-g blog-article-widget blog-article-margin">
+            <div class="am-u-lg-4 am-u-md-5 am-u-sm-7 am-u-sm-centered blog-text-center">
+                <span class="am-icon-tags">&nbsp;</span>
+                {% for v in tags %}
+                <a href="{{ url_for('home.tagsblogs',tid=v.id) }}">{{ v.name }}</a>
+                {% endfor %}
+                
+                <hr>
+                <a href="javascript:;">
+                    <span class="am-icon-qq am-icon-fw am-primary blog-icon"></span>
+                </a>
+                <a href="javascript:;">
+                    <span class="am-icon-wechat am-icon-fw blog-icon"></span>
+                </a>
+                <a href="javascript:;">
+                    <span class="am-icon-weibo am-icon-fw blog-icon"></span>
+                </a>
+            </div>
+        </div>
+        <hr>
+        <div class="am-g blog-author blog-article-margin">
+            <div class="am-u-sm-3 am-u-md-3 am-u-lg-2">
+                <img src="{{ blog.user.face }}" alt="" class="blog-author-img am-circle"></div>
+            <div class="am-u-sm-9 am-u-md-9 am-u-lg-10">
+                <h3>
+                    <span>作者 &nbsp;: &nbsp;</span>
+                    <span class="blog-color">{{ blog.user.name }}</span></h3>
+                <p>{{ blog.user.info|default('这个人很懒,p都没有',true)}}</p>
+            </div>
+        </div>
+        <hr>
+
+        <!-- 判断当前用户是否登录 -->
+        <h3>评论内容</h3>
+        {% if comments %}
+            {% for v in comments %}
+                <div class="am-g" style="border: 1px dotted #ccc;">
+                    <div class="am-u-sm-9 am-u-md-9 am-u-lg-10 ccc">
+                        <h4 style="position: relative;">
+                            {% if v.user.id == blog.user.id %}
+                            <span>作者 &nbsp;: &nbsp;</span>
+                            {% else %}
+                            <span>评论人 &nbsp;: &nbsp;</span>
+                            {% endif %}
+                          
+                            <span class="blog-color author">{{ v.user.name }}</span>&nbsp;&nbsp;
+                            <span>时间:{{ v.addtime }}</span>
+                            <form style="display: inline-block;" action="{{url_for('home.hf')}}" method="POST">
+                                <div class="am-modal am-modal-prompt" tabindex="-1" id='my-prompt{{ v.id }}'>
+                                    <div class="am-modal-dialog">
+                                        <div class="am-modal-bd">
+                                            你想说点啥?{{ v.id }}
+                                            <input type="hidden" name="cid" value="{{ v.id }}">
+                                            <input type="text" name="context" class="am-modal-prompt-input">
+                                        </div>
+                                        <div class="am-modal-footer">
+                                            <span class="am-modal-btn" data-am-modal-cancel>取消</span>
+                                            <button class="am-btn am-btn-default" style="background: #F8F8F8;border: none;color:#EB5350">
+                                                提交
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                            <button type="button" class="am-btn am-btn-success doc-prompt-toggle" id='doc-prompt-toggle{{ v.id }}' style="position: absolute; right:10px;">
+                                回复
+                            </button>
+                            <script type="text/javascript">
+                                $(function(){
+                                    $('#doc-prompt-toggle{{ v.id }}').on('click',function(){
+                                        $('#my-prompt{{ v.id }}').modal({
+                                            relatedTarget: this,
+                                            onConfirm: function(e) {
+                                                console.log('你输入的是：' + e.data || '')
+                                                },
+                                            onCancel: function(e) {
+                                                console.log('不想说!');
+                                                }
+                                            });
+                                        });
+                                    });
+                            </script>
+                        </h4>
+
+                        <p>{{ v.context }}</p>
+                        <!-- <p style="float: right">时间:{{ v.addtime }}&nbsp; &nbsp;<a href="#comments" cid="{{ v.id }}" class="commentscid am-btn am-btn-primary am-btn-xs">回复</a></p> -->
+                    </div>
+                    {% for i in v.reply %}
+                        
+                        <div class="am-u-sm-9 am-u-md-9 am-u-lg-10 am-fr"  style="border: 1px dotted #ccc;">
+                            <h4 style="margin: 0px;position:relative; ">
+                                {% if i.user_id  == blog.uid %}
+                                    <span>作者:{{ i.user.name }}</span>
+                                {% elif i.user_id == v.user_id %}
+                                    <span>评论人:{{ i.user.name }}</span>
+                                {% else %}
+                                    <span>用户:{{ i.user.name }}</span>
+                                {% endif %}
+
+                                <span>----></span>
+
+                                {% if i.rid %}
+                                    {% if (i.rid | get_reply_user) == blog.user.name %}
+                                        <span>作者:{{ blog.user.name }}</span>
+                                    {% else %}
+                                        <span>用户:{{ i.rid | get_reply_user }}</span>
+                                    {% endif %}
+                                {% else %}
+                                    {% if v.user.name == blog.user.name %}
+                                        <span>作者:{{ v.user.name }}</span>
+                                    {% else %}
+
+                                        <span>评论人:{{ v.user.name }}</span>
+                                    {% endif %}
+                                    
+                                {% endif %}
+
+                                <form style="display: inline-block;" action="{{url_for('home.hf')}}" method="POST">
+                                    <div class="am-modal am-modal-prompt" tabindex="-1" id='my-prompt{{i.id}}'>
+                                    <div class="am-modal-dialog">
+                                        <div class="am-modal-bd">
+                                            你想说点啥?{{ i.id }}
+                                            <input type="hidden" name="cid" value="{{ v.id }}">
+                                            <input type="hidden" name="rid" value="{{ i.id }}">
+
+                                            <input type="text" name="context" class="am-modal-prompt-input">
+                                        </div>
+                                        <div class="am-modal-footer" style="">
+                                            <span class="am-modal-btn" data-am-modal-cancel>取消</span>
+                                            <button class="am-btn am-btn-default" style="background: #F8F8F8;border: none;color:#EB5350;">
+                                                提交
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                </form>
+                                <button type="button" class="am-btn am-btn-success" id="doc-prompt-toggle{{ i.id }}" style="position: absolute; right:10px;">
+                                    回复
+                                </button>
+                                <script type="text/javascript">
+                                $(function(){
+                                    $('#doc-prompt-toggle{{i.id}}').on('click', function() {
+                                        $('#my-prompt{{i.id}}').modal({
+                                            relatedTarget: this,
+                                            onConfirm: function(e) {
+                                                console.log('你输入的是：' + e.data || '')
+                                                },
+                                            onCancel: function(e) {
+                                                console.log('不想说!');
+                                                }
+                                            });
+                                        });
+                                    });
+                                </script>
+                            </h4>
+                            <p style="margin: 0px;">{{ i.context }}</p>
+                            <p style="float: right;margin: 0px;">时间:{{ i.addtime }}&nbsp; &nbsp;</p>
+                            
+                        </div>
+                        
+                    {% endfor %}
+                </div>
+                <br>
+            {% endfor %}
+        {% endif %}
+       
+    </div>
+    
+
+{% endblock %}
+
+{% block conright %}
+
+    <div class="am-u-md-4 am-u-sm-12 blog-sidebar">
+        <div class="blog-sidebar-widget blog-bor">
+            <h2 class="blog-text-center blog-title"><span>About ME</span></h2>
+            <img src='{{ blog.user.face }}' alt="about me" class="blog-entry-img">
+            <p>{{ blog.user.name }}</p>
+            <p>{{ blog.user.blog|d('这个人很懒,P都没留下',true) }}</p>
+        </div>
+
+        <div class="blog-sidebar-widget blog-bor">
+            <h2 class="blog-text-center blog-title"><span>Contact ME</span></h2>
+            <p>
+                <a href="javascript:;"><span class="am-icon-qq am-icon-fw am-primary blog-icon"></span></a>
+                <a href="javascript:;"><span class="am-icon-github am-icon-fw blog-icon"></span></a>
+                <a href="javascript:;"><span class="am-icon-weibo am-icon-fw blog-icon"></span></a>
+                <a href="javascript:;"><span class="am-icon-reddit am-icon-fw blog-icon"></span></a>
+                <a href="javascript:;"><span class="am-icon-weixin am-icon-fw blog-icon"></span></a>
+            </p>
+        </div>
+        <div class="blog-clear-margin blog-sidebar-widget blog-bor am-g ">
+            <h2 class="blog-title">
+                <span>TAG cloud</span>
+            </h2>
+            <div class="am-u-sm-12 blog-clear-padding">
+                {% for v in 'a'| gettagsall %}
+                    <a href="{{ url_for('home.tagsblogs',tid=v.id) }}" class="blog-tag">{{ v.name }}</a>
+                {% endfor %}
+            </div>
+        </div>
+        
+    </div>
+{% endblock %}
+</div>
+<div class="am-g am-g-fixed blog-fixed">
+    <div class="am-u-md-12 am-u-sm-12">
+        <hr>
+        <form action="{{ url_for('home.comment') }}" method="POST" class="am-form am-g">
+            <h3 class="blog-comment" id="comments">评论</h3>
+
+            {% if session.get('VipUser') %}
+
+            <fieldset>
+                <div class="am-form-group am-u-sm-4 blog-clear-right">
+                    <input type="hidden" name="pid" class="" value="{{ blog.id }}">
+                </div>
+
+                <div class="am-form-group">
+                <textarea name="context" rows="5" placeholder="一字千金"></textarea>
+                </div>
+
+                <p><button type="submit" class="am-btn am-btn-default">发表评论</button></p>
+            </fieldset>
+
+            {% else %}
+            <center>
+                <a href="{{ url_for('home.login') }}?next={{ request.path }}">请先<span style="color:blue;">登录</span>后评价</a>
+            </center>
+
+            {% endif %}
+        </form>
+        <hr>
+    </div>
+</div>
+    
+{% endblock %}

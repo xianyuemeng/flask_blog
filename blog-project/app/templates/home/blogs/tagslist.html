@@ -1,0 +1,57 @@
+{% extends 'home/base.html' %}
+
+{% block con %}
+
+<div class="am-g am-g-fixed blog-fixed">
+    <hr>
+    {% block conleft %}
+    {% if tag.posts %}
+    <div class="am-u-md-8 am-u-sm-12">
+        {% for i in tag.posts %}
+        <article class="am-g blog-entry-article"> 
+            <div class="am-u-lg-6 am-u-md-12 am-u-sm-12 blog-entry-text">
+                <span>作者 &nbsp;</span>
+                <span><a href="{{ url_for('home.tagsblogs',tid=i.id) }}" class="blog-color">@{{ i.user.name }} &nbsp;</a></span>
+                <span>{{ i.addtime }}</span>
+                <h1><a href="{{ url_for('home.bloginfo',pid=i.id)}}">{{ i.title }}</a></h1>
+              
+                <!-- <span>{{ i.context|safe }}</span> -->
+            </div>
+        </article>
+        {% endfor %}
+
+        
+        <ul class="am-pagination">
+            <li class="am-pagination-prev"><a href="">&laquo; Prev</a></li>
+            <li class="am-pagination-next"><a href="">Next &raquo;</a></li>
+        </ul>
+
+    </div>
+    {% else %}
+    <div class="am-u-md-8 am-u-sm-12">
+        <article class="am-g blog-entry-article"> 
+            <h2>该标签下暂时没有文章......</h2>
+        </article>  
+    </div>
+
+    {% endif %}
+    {% endblock %}
+
+    {% block conright %}
+    <div class="am-u-md-4 am-u-sm-12 blog-sidebar">
+        
+        <div class="blog-clear-margin blog-sidebar-widget blog-bor am-g ">
+            <h2 class="blog-title">
+                <span>TAG cloud</span>
+            </h2>
+            <div class="am-u-sm-12 blog-clear-padding">
+                {% for v in 'a'| gettagsall %}
+                    <a href="{{ url_for('home.tagsblogs',tid=v.id) }}" class="blog-tag">{{ v.name }}</a>
+                {% endfor %}
+            </div>
+        </div>
+        
+    </div>
+    {% endblock %}
+</div>
+{% endblock %}
